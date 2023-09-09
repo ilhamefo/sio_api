@@ -8,10 +8,10 @@ use App\Models\UsersProfile;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
- 
-class DetailProfileUsers extends Controller
-{
+use Illuminate\Support\Facades\DB;
 
+class DetailProfileController extends Controller
+{
     public function AddFollower(Request $request){
         $datas = [
             'phone_number' => $request->input('phone_number'),
@@ -22,13 +22,45 @@ class DetailProfileUsers extends Controller
 
     public function DetailProfile(Request $request){
 
-        $datas = UsersProfile::with('user')->where('id_users',auth()->user()->id)->first();
+        $data = DB::table('users')
+                ->select(
+                    'users.id AS id',
+                    'users.name AS name',
+                    'users.email AS email',
+                    'users.username AS username',
+                    'users_profile.id AS profile_id',
+                    'users_profile.phone_number AS profile_phone_number',
+                    'users_profile.first_name AS profile_first_name',
+                    'users_profile.last_name AS profile_last_name',
+                    'users_profile.date_of_birth AS profile_date_of_birth',
+                    'users_profile.image AS profile_image',
+                    'total_follower',
+                    'total_following'
+                )
+                ->leftJoinSub(
+                    DB::table('followorfollowing')
+                        ->select(
+                            'id_users',
+                            DB::raw('SUM(CASE WHEN kategori = "follower" THEN 1 ELSE 0 END) AS total_follower'),
+                            DB::raw('SUM(CASE WHEN kategori = "following" THEN 1 ELSE 0 END) AS total_following')
+                        )
+                        ->where('id_users', 2)
+                        ->groupBy('id_users'),
+
+                    'follower_counts',
+                    'follower_counts.id_users',
+                    '=',
+                    'users.id'
+                )
+                ->join('users_profile', 'users_profile.id_users', '=', 'users.id')
+                ->where('users.id', auth()->user()->id)
+                ->get();
 
         return response()->json(
             [
                 "status"=> "success",
                 "message"=> "Data retrieved successfully",
-                "data" => $datas,
+                "data" => $data,
             ], 
         200);
     }

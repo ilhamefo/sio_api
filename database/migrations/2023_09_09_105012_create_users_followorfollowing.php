@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('following', function (Blueprint $table) {
+        Schema::create('followorfollowing', function (Blueprint $table) {
             $table->id()->length(11);
-            $table->integer('id_follower')->length(11);
-            $table->integer('id_followee')->length(11);
+            $table->integer('id_users')->length(11);
+            $table->integer('id_follow')->length(11);
+            $table->string('kategori')->length(20);
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('following');
+        Schema::dropIfExists('followorfollowing');
     }
 };

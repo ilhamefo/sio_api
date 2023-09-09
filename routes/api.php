@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\PassportAuthController;
-use App\Http\Controllers\API\DetailProfileUsers;
+use App\Http\Controllers\API\DetailProfileController;
 
 
 /*
@@ -36,11 +36,9 @@ Route::get('login', function () {
 Route::post('register', [PassportAuthController::class, 'Register']);
 Route::post('login-user', [PassportAuthController::class, 'loginUser']);
 
-
-
 Route::middleware('auth:api')->group(function () {
-    Route::get('profile-user-detail', [DetailProfileUsers::class, 'DetailProfile']);
-    Route::post('profile-user-add', [DetailProfileUsers::class, 'AddDetailProfile']);
-    Route::post('profile-user-addfollower', [DetailProfileUsers::class, 'AddFollower']);
+    Route::get('profile-user-detail', [DetailProfileController::class, 'DetailProfile']);
+    Route::post('profile-user-add', [DetailProfileController::class, 'AddDetailProfile']);
+    Route::post('profile-user-addfollower', [DetailProfileController::class, 'AddFollower']);
     Route::get('detail-user', [PassportAuthController::class, 'UserInfo']);
 });
