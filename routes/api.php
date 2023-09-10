@@ -3,9 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\API\PassportAuthController;
-use App\Http\Controllers\API\DetailProfileController;
-use App\Http\Controllers\API\PostingController;
+use App\Http\Controllers\Api\PassportAuthController;
+use App\Http\Controllers\Api\DetailProfileController;
+use App\Http\Controllers\Api\PostingController;
 
 
 /*
