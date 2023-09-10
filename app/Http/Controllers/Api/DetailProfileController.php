@@ -9,6 +9,7 @@ use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DetailProfileController extends Controller
 {
@@ -74,7 +75,7 @@ class DetailProfileController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'date_of_birth' => 'required|date_format:Y-m-d',
-            'image_profile' => 'required|string',
+            'image_profile' => 'required|max:2048|image|mimes:jpeg,png,jpg',
         ]);
 
         if ($validator->fails()) {
@@ -86,12 +87,21 @@ class DetailProfileController extends Controller
         }
 
         try {
+
+            //create folder
+            $path = public_path().'/photo_profile/';
+            Storage::makeDirectory($path, $mode = 0711, true, true);
+
+            //Upload Photo Profile
+            $fileNewName = 'profile_'.$request->input('first_name').'_'.rand().'_'.auth()->user()->id.'.'.pathinfo($request->file('image_profile')->getClientOriginalName(), PATHINFO_EXTENSION).''; 
+            $image = $request->file('image_profile')->move(public_path('photo_profile'), $fileNewName);
+
             $datas = [
                 'phone_number' => $request->input('phone_number'),
                 'first_name' => $request->input('first_name'),
                 'last_name' => $request->input('last_name'),
                 'date_of_birth' => $request->input('date_of_birth'),
-                'image' => asset('storage/photo_profile/'.$request->input('image_profile')),
+                'image' => asset('photo_profile/'.$fileNewName),
             ];
 
             UsersProfile::updateOrInsert(['id_users' => $idUsers], $datas);
@@ -99,7 +109,7 @@ class DetailProfileController extends Controller
             
             return response()->json([
                     "status"=> "success",
-                    "message"=> "Data retrieved successfully",
+                    "message"=> "Data store successfully",
                     "data" => $userProfile,
                 ], 200);
 
@@ -115,4 +125,6 @@ class DetailProfileController extends Controller
         }   
 
     }
+
+
 }
