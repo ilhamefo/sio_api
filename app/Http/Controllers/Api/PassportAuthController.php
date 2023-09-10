@@ -57,7 +57,7 @@ class PassportAuthController extends Controller
             return response()->json([
                     "status"=> "fail",
                     "message"=> "Terjadi Kesalahan",
-                    "data" => "",
+                    "data" => $e->getMessage(),
                 ], 500);
         }
 
