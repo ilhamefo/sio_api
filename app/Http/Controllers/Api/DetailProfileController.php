@@ -129,7 +129,7 @@ class DetailProfileController extends Controller
 
             $usersDetail = DB::table('users')
             ->leftJoin('users_profile', 'users.id', '=', 'users_profile.id_users')
-            ->where('users.username', 'like', '%' . $searchUser . '%')
+            ->where('users.username', 'like', $searchUser.'%')
             ->select(
                 'users.id as id',
                 'users.name as name',
