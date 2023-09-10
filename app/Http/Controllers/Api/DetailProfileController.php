@@ -126,11 +126,27 @@ class DetailProfileController extends Controller
         $searchUser = $request->searchUser;
 
         try{
-            $usersDetail = User::where('username', 'like', '%' . $searchUser . '%')
-                ->with('UsersProfilee')
-                ->get();
+
+            $usersDetail = DB::table('users')
+            ->leftJoin('users_profile', 'users.id', '=', 'users_profile.id_users')
+            ->where('users.username', 'like', '%' . $searchUser . '%')
+            ->select(
+                'users.id as id',
+                'users.name as name',
+                'users.email as email',
+                'users.username as username',
+                'users_profile.id as profile_id',
+                'users_profile.phone_number as profile_phone_number',
+                'users_profile.first_name as profile_first_name',
+                'users_profile.last_name as profile_last_name',
+                'users_profile.date_of_birth as profile_date_of_birth',
+                'users_profile.image as profile_image'
+            )
+            ->get();
+
 
             return response()->json(["status"=> "success", "message"=> "Data retrieved successfully","data" => $usersDetail],200);
+
         } catch (\Exception $e) {
 
             Log::error('error note: ' . $e->getMessage());
