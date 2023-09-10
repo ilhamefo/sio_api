@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\UsersProfile;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
+use App\Models\UsersProfile;
 
 class DetailProfileController extends Controller
 {
@@ -23,39 +24,30 @@ class DetailProfileController extends Controller
 
     public function DetailProfile(Request $request){
 
-        $data = DB::table('users')
+        $data = DB::table('users AS u')
                 ->select(
-                    'users.id AS id',
-                    'users.name AS name',
-                    'users.email AS email',
-                    'users.username AS username',
-                    'users_profile.id AS profile_id',
-                    'users_profile.phone_number AS profile_phone_number',
-                    'users_profile.first_name AS profile_first_name',
-                    'users_profile.last_name AS profile_last_name',
-                    'users_profile.date_of_birth AS profile_date_of_birth',
-                    'users_profile.image AS profile_image',
-                    'total_follower',
-                    'total_following'
+                    'u.id AS id',
+                    'u.name AS name',
+                    'u.email AS email',
+                    'u.username AS username',
+                    'up.id AS profile_id',
+                    'up.phone_number AS profile_phone_number',
+                    'up.first_name AS profile_first_name',
+                    'up.last_name AS profile_last_name',
+                    'up.date_of_birth AS profile_date_of_birth',
+                    'up.image AS profile_image',
+                    DB::raw('COUNT(DISTINCT f1.id) AS total_followers'),
+                    DB::raw('COUNT(DISTINCT f2.id) AS total_following')
                 )
-                ->leftJoinSub(
-                    DB::table('followorfollowing')
-                        ->select(
-                            'id_users',
-                            DB::raw('SUM(CASE WHEN kategori = "follower" THEN 1 ELSE 0 END) AS total_follower'),
-                            DB::raw('SUM(CASE WHEN kategori = "following" THEN 1 ELSE 0 END) AS total_following')
-                        )
-                        ->where('id_users', 2)
-                        ->groupBy('id_users'),
-
-                    'follower_counts',
-                    'follower_counts.id_users',
-                    '=',
-                    'users.id'
+                ->join('users_profile AS up', 'u.id', '=', 'up.id_users')
+                ->leftJoin('followers AS f1', 'u.id', '=', 'f1.following_id')
+                ->leftJoin('followers AS f2', 'u.id', '=', 'f2.follower_id')
+                ->where('u.id', '=', auth()->user()->id)
+                ->groupBy(
+                    'u.id', 'u.name', 'u.email', 'u.username', 'up.id', 'up.phone_number',
+                    'up.first_name', 'up.last_name', 'up.date_of_birth', 'up.image'
                 )
-                ->join('users_profile', 'users_profile.id_users', '=', 'users.id')
-                ->where('users.id', auth()->user()->id)
-                ->get();
+                ->first();
 
         return response()->json(
             [
@@ -119,10 +111,64 @@ class DetailProfileController extends Controller
 
             return response()->json([
                     "status"=> "fail",
-                    "message"=> "Terjadi Kesalahan",
+                    "message"=> "Server error",
                     "data" => "",
                 ], 500);
         }   
+
+    }
+
+
+
+    public function SearchUsers(Request $request){
+
+        //Pencarian berdasarkan username
+        $searchUser = $request->searchUser;
+
+        try{
+            $usersDetail = User::where('username', 'like', '%' . $searchUser . '%')
+                ->with('UsersProfilee')
+                ->get();
+
+            return response()->json(["status"=> "success", "message"=> "Data retrieved successfully","data" => $usersDetail],200);
+        } catch (\Exception $e) {
+
+            Log::error('error note: ' . $e->getMessage());
+
+            return response()->json([ "status"=> "fail","message"=> "Server error","data" => ""], 500);
+        }      
+
+    }
+
+    public function FollowUnfollow(Request $request){
+
+        try{
+
+            if (auth()->user()->id == $request->id_user_target) {//tidak bisa folow dirisendiri
+                return response()->json(["status"=> "success", "message"=> "Can't follow yourself","data" => ""],400);
+            }
+
+            $statusFollow = auth()->user()->toggleFollow($request->id_user_target);
+
+            if ($statusFollow === 'followed') {
+                auth()->user()->following()->detach($request->id_user_target);
+                $fixStatus = 'Unfollow successfully';
+            } elseif ($statusFollow === 'unfollowed') {
+                auth()->user()->following()->attach($request->id_user_target);
+                $fixStatus = 'Follow successfully';
+            }
+
+            return response()->json(["status"=> "success", "message"=> $fixStatus,"data" => ""],200);
+        
+        } catch (\Exception $e) {
+
+            Log::error('error note: ' . $e->getMessage());
+            return response()->json([
+                    "status"=> "fail",
+                    "message"=> "Server error",
+                    "data" => "",
+                ],500);
+        }
 
     }
 

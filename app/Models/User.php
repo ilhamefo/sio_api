@@ -45,7 +45,41 @@ class User extends Authenticatable
 
     public function Posting()
     {
-        return $this->hasMany(Posting::class);
+        return $this->hasMany(Posting::class,'user_id');
+    }
+
+    public function Commentss()
+    {
+        return $this->hasMany(Comments::class,'user_id');
+    }
+
+    public function UsersProfilee()
+    {
+        return $this->hasOne(UsersProfile::class, 'id_users');
+    }
+
+    public function Followorfollowingg()
+    {
+        return $this->belongsToMany(Followorfollowing::class, 'id_users');
+    }
+
+    public function following() {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'following_id');
+    }
+
+    // users that follow this user
+    public function followers() {
+        return $this->belongsToMany(User::class, 'followers', 'following_id', 'follower_id');
+    }
+
+    public function toggleFollow($idTargets)
+    {
+        $user = $this->following()->find($idTargets);
+        if ($user) {
+            return 'followed';
+        } else {
+            return 'unfollowed';
+        }
     }
 
 }

@@ -11,12 +11,46 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Posting;
 use App\Models\PostingImage;
+use App\Models\Likes;
+use App\Models\Comments;
 
 class PostingController extends Controller
 {   
 
-    public function AddLike(Request $request){
-        
+    public function AddLike(Request $request, $postingId){
+    
+        // Cari postingan
+        $post = Posting::find($postingId);
+
+        if (!$post) {
+            return response()->json([ "status"=> "fail", "message"=> "Post not found","data" => ""],404);
+        }
+
+        $alReady = Likes::where('user_id', auth()->user()->id)->where('post_id', $post->id)->first();
+
+        if ($alReady) {
+            $alReady->delete();//hapus jika sudah like
+            return response()->json([ "status"=> "success", "message"=> "Delete successfully","data" => ""],200);
+        } else { //like baru
+
+            try{
+
+                $like = new Likes();
+                $like->user_id = auth()->user()->id;
+                $like->post_id = $post->id;
+                $like->save();
+                return response()->json([ "status"=> "success", "message"=> "Like store successfully","data" => ""],200);
+            
+            } catch (\Exception $e) {
+
+                Log::error('error note: ' . $e->getMessage());
+                return response()->json([
+                        "status"=> "fail",
+                        "message"=> "Server error",
+                        "data" => "",
+                    ],500);
+            }
+        }
     }
     
     public function AddPostingImage(Request $request){
@@ -27,11 +61,7 @@ class PostingController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                    "status"=> "fail",
-                    "message"=> $validator->errors(),
-                    "data" => "",
-                ],400);
+            return response()->json([ "status"=> "fail","message"=> $validator->errors(),"data" => ""],400);
         }
 
         DB::beginTransaction();
@@ -62,11 +92,7 @@ class PostingController extends Controller
 
             DB::commit();//komit data
 
-            return response()->json([
-                    "status"=> "success",
-                    "message"=> "Data store successfully",
-                    "data" => $posts,
-                ],200);
+            return response()->json(["status"=> "success","message"=> "Data store successfully", "data" => ""],200);
        
         } catch (\Exception $e) {
 
@@ -74,17 +100,58 @@ class PostingController extends Controller
 
             return response()->json([
                     "status"=> "fail",
-                    "message"=> "Terjadi Kesalahan",
+                    "message"=> "Server error",
                     "data" => "",
-                ],200);
+                ],500);
         }
       
     }
 
+    public function Postcomments(Request $request, $postingId){
+
+        // Cari postingan
+        $post = Posting::find($postingId);
+
+        if (!$post) {
+            return response()->json(["status"=> "fail","message"=> "Post not found","data" => ""],404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'comments' => 'required|string'
+        ]);
+
+        try{
+            $comment = new Comments();
+            $comment->post_id = $post->id;
+            $comment->user_id = auth()->user()->id;
+            $comment->comment_text = $request->comments;
+            $comment->save();
+
+            $lastComment = Comments::latest()->select('comment_text','post_id')->first();
+
+            return response()->json(["status"=> "success","message"=> "Data store successfully","data" => $lastComment],200);
+       
+        } catch (\Exception $e) {
+
+            Log::error('error note: ' . $e->getMessage());
+
+            return response()->json(["status"=> "fail", "message"=> "Server error","data" => ""],500);
+        }
+
+    }
+
     public function GetPosting(){
 
-        $Postingans = Posting::with('PostingImages')->where('user_id', auth()->user()->id)->get();
-     
+        //keluanran postingan|comments|images|totallike|totalcomments
+        $Postingans = Posting::with(
+            ['PostingImages' => function ($query) {
+                $query->select('post_id', 'image_path', 'created_at');
+            },
+            'Commentss' => function ($query) {
+                $query->select('post_id', 'user_id', 'comment_text','created_at');
+            }
+        ])->withCount(['Likess','Commentss'])->where('user_id', auth()->user()->id)->get();
+
         return response()->json(
             [
                 "status"=> "success",

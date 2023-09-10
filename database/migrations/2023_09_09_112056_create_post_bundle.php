@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id')->length(11);
             $table->text('caption');
-            $table->integer('likes')->default(0);
             $table->timestamps();
         });
         
@@ -31,9 +30,18 @@ return new class extends Migration
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->integer('post_id')->length(11);
+            $table->integer('user_id')->length(11);
             $table->text('comment_text');
             $table->timestamps();
         });
+
+        Schema::create('likes', function (Blueprint $table) {
+            $table->id();
+            $table->integer('post_id')->length(11);
+            $table->integer('user_id')->length(11);
+            $table->timestamps();
+        });
+
     }
 
     /**

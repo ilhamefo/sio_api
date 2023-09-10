@@ -5,21 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PostingImage extends Model
+class Likes extends Model
 {
     use HasFactory;
 
-    protected $table = 'post_images';
+    protected $table = 'likes';
     
     protected $fillable = [
         'post_id',
-        'image_path',
+        'user_id',
     ];
 
     public function posting()
     {
         return $this->belongsTo(Posting::class);
     }
-    
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_users');
+    }
 
 }

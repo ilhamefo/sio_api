@@ -13,7 +13,6 @@ class Posting extends Model
     
     protected $fillable = [
         'caption',
-        'likes',
     ];
 
     public function user()
@@ -24,6 +23,16 @@ class Posting extends Model
     public function PostingImages()
     {
         return $this->hasMany(PostingImage::class, 'post_id');
+    }
+
+    public function Likess()
+    {
+        return $this->hasMany(Likes::class, 'post_id');
+    }
+
+    public function Commentss()
+    {
+        return $this->hasMany(Comments::class, 'post_id');
     }
 
 }

@@ -41,10 +41,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('profile-user-detail', [DetailProfileController::class, 'DetailProfile']);
     Route::post('profile-user-add', [DetailProfileController::class, 'AddDetailProfile']);
     Route::post('profile-user-addfollower', [DetailProfileController::class, 'AddFollower']);
+    Route::get('search-users', [DetailProfileController::class, 'SearchUsers']);
+    Route::post('follow-unfol', [DetailProfileController::class, 'FollowUnfollow']);
 
     Route::get('posting-get', [PostingController::class, 'GetPosting']);
     Route::post('posting-add', [PostingController::class, 'AddPostingImage']);
-    Route::post('posting-like', [PostingController::class, 'AddLike']);
+    Route::post('posting-like/{id_post}', [PostingController::class, 'AddLike']);
+    Route::post('posting-commets/{id_post}', [PostingController::class, 'Postcomments']);
 
     Route::get('detail-user', [PassportAuthController::class, 'UserInfo']);
 });

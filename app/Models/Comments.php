@@ -5,21 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PostingImage extends Model
+class Comments extends Model
 {
     use HasFactory;
 
-    protected $table = 'post_images';
+    protected $table = 'comments';
     
     protected $fillable = [
         'post_id',
-        'image_path',
+        'user_id',
+        'comments_text',
     ];
 
     public function posting()
     {
         return $this->belongsTo(Posting::class);
     }
-    
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }
