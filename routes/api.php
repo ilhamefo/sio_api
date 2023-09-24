@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PassportAuthController;
 use App\Http\Controllers\Api\DetailProfileController;
 use App\Http\Controllers\Api\PostingController;
+use App\Http\Controllers\Api\BerandaPosting;
 
 
 /*
@@ -36,6 +37,8 @@ Route::get('login', function () {
 
 Route::post('register', [PassportAuthController::class, 'Register']);
 Route::post('login-user', [PassportAuthController::class, 'loginUser']);
+
+Route::get('beranda', [BerandaPosting::class, 'BerandaPosting']);
 
 Route::middleware('auth:api')->group(function () {
     Route::get('profile-user-detail', [DetailProfileController::class, 'DetailProfile']);
