@@ -88,6 +88,6 @@ RUN php artisan storage:link
 
 
 # Expose port 9000 and start php-fpm server
-EXPOSE 8882
+EXPOSE 9000
 
 CMD ["php-fpm"]
