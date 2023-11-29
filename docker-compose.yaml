@@ -1,12 +1,11 @@
 version: '3.5'
 services:
   #PHP Service
-  app:
+  app_siov1:
     build:
       context: .
       dockerfile: Dockerfile
-    image: laravel-test
-    container_name: app
+    container_name: app_siov1
     restart: unless-stopped
     tty: true
     environment:
@@ -18,14 +17,13 @@ services:
     networks:
       - efo_networks
   # Nginx Service
-  webserver:
+  webserver_sio:
     image: nginx:alpine
-    container_name: webserver
+    container_name: webserver_sio
     restart: unless-stopped
     tty: true
     ports:
-      - "8008:8008"
-      - "443:443"
+      - "8881:8881"
     volumes:
      - ./:/var/www
      - ./nginx/conf.d/:/etc/nginx/conf.d/
@@ -35,22 +33,6 @@ services:
           - service_web
     command: [nginx-debug, '-g', 'daemon off;']
   # POSTGRES CONTAINER
-  postgres:
-    image: postgres:14.6-alpine
-    container_name: postgres_db
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ilhamefo
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_DATABASE}
-    ports:
-      - 5430:5432
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - efo_networks
 #Docker Networks
 volumes:
   dbdata:

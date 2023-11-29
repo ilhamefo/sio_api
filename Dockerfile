@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Copy composer.lock and composer.json
+# Copy composer.lock and composer.json    
 COPY composer.lock composer.json /var/www/
 
 # Set working directory
@@ -8,13 +8,22 @@ WORKDIR /var/www
 
 # Clear cache
 RUN apt-get update
-RUN apt-get install libonig-dev --assume-yes
-RUN apt-get install libzip-dev --assume-yes
-RUN apt-get install libpng-dev --assume-yes
-RUN apt-get install libjpeg-dev --assume-yes
-RUN apt-get install libfreetype6-dev --assume-yes
-RUN apt-get install libpq-dev --assume-yes
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get install libonig-dev --assume-yes \
+    && apt-get clean
+RUN apt-get install libzip-dev --assume-yes \
+    && apt-get clean
+RUN apt-get install libpng-dev --assume-yes \
+    && apt-get clean
+RUN apt-get install libjpeg-dev --assume-yes \
+    && apt-get clean
+RUN apt-get install libfreetype6-dev --assume-yes \
+    && apt-get clean
+RUN apt-get install libpq-dev --assume-yes \
+    && apt-get clean 
+RUN apt-get install libsodium-dev --assume-yes \
+    && apt-get clean
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 # Install extensions
 RUN docker-php-ext-install pdo_mysql
@@ -79,6 +88,6 @@ RUN php artisan storage:link
 
 
 # Expose port 9000 and start php-fpm server
-EXPOSE 9000
+EXPOSE 8881
 
 CMD ["php-fpm"]
