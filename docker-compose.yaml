@@ -1,11 +1,11 @@
 version: '3.5'
 services:
   #PHP Service
-  app_siov1:
+  sio:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app_siov1
+    container_name: sio
     restart: unless-stopped
     tty: true
     environment:
