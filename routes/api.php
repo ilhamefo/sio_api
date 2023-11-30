@@ -29,11 +29,15 @@ use App\Http\Controllers\Api\BerandaPosting;
 
 Route::get('login', function () {
     return response()->json([
-                    "status"=> "success",
-                    "message"=> "Gagal Login",
-                    "data" => "",
-                ], 200);
+        "status"  => "success",
+        "message" => "Gagal Login",
+        "data"    => "",
+    ], 200);
 })->name('login');
+
+Route::get('foo', function () {
+    dd(env("HELLO"));
+});
 
 Route::post('register', [PassportAuthController::class, 'Register']);
 Route::post('login-user', [PassportAuthController::class, 'loginUser']);
