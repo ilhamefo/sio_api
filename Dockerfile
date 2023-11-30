@@ -73,7 +73,7 @@ RUN chown -R www:www /var/www
 # Change current user to www
 USER www
 
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --optimize-autoloader
 
 RUN php artisan key:generate
 
