@@ -76,6 +76,10 @@ RUN composer install --optimize-autoloader --no-dev
 
 RUN php artisan key:generate
 
+RUN php artisan passport:keys 
+
+RUN php artisan passport:install
+
 RUN php artisan config:cache
 
 RUN php artisan route:cache
